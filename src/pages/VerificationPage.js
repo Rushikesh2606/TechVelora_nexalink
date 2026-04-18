@@ -1,96 +1,287 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
-import TrustBadge from '../components/shared/TrustBadge';
+import { uploadGovernmentId, recalculateTrustScore, verifyEmailOTP, sendEmailOTP } from '../services/trustService';
 import TrustScoreWidget from '../components/trust/TrustScoreWidget';
 
 export default function VerificationPage() {
-  const { userProfile, isCompany } = useAuth();
+  const { currentUser, userProfile, fetchUserProfile } = useAuth();
+  
+  const [activeUpload, setActiveUpload] = useState(null); // 'gov', 'email', or null
+  
+  // Gov upload states
+  const [file, setFile] = useState(null);
+  const [docType, setDocType] = useState('aadhaar');
+  const [uploadingGov, setUploadingGov] = useState(false);
+  
+  // Email states
+  const [otpSent, setOtpSent] = useState(false);
+  const [otp, setOtp] = useState('');
+  const [verifyingEmail, setVerifyingEmail] = useState(false);
 
-  if (!userProfile) {
-    return <div className="page-full text-center p-5 text-muted">Loading verification status...</div>;
-  }
+  const [message, setMessage] = useState('');
 
-  const verifications = [
-    { title: 'Email Address', desc: 'Secure your account', verified: userProfile.emailVerified, points: 10 },
-    { title: 'Profile Completeness', desc: 'Add headline, bio, and location', verified: !!(userProfile.bio && userProfile.location), points: 20 },
-    ...(!isCompany ? [
-      { title: 'Education History', desc: 'Add your educational background', verified: !!(userProfile.education && userProfile.education.length > 0), points: 15 },
-      { title: 'Professional Skills', desc: 'List your core competencies', verified: !!(userProfile.skills && userProfile.skills.length > 0), points: 10 },
-      { title: 'Network Strength', desc: 'Connect with at least 5 professionals', verified: (userProfile.connectionsCount || 0) >= 5, points: 20 },
-    ] : [
-      { title: 'Company Details', desc: 'Add industry and website', verified: !!(userProfile.industry && userProfile.website), points: 15 },
-      { title: 'Job Postings', desc: 'Post at least 1 job opening', verified: (userProfile.jobsCount || 0) > 0, points: 30 },
-    ]),
-    { title: 'Platform Activity', desc: 'Create your first post', verified: (userProfile.postsCount || 0) > 0, points: 15 }
-  ];
+  // Initialization: recalculate triggers auto-verifications if data is missing
+  useEffect(() => {
+    if (currentUser) {
+      recalculateTrustScore(currentUser.uid).then(() => {
+        if (fetchUserProfile) fetchUserProfile(currentUser.uid);
+      });
+    }
+  }, [currentUser]);
+
+  const breakdown = userProfile?.trustBreakdown || {
+    email: false, profile: false, education: false, skills: false, gov: false
+  };
+
+  const points = userProfile?.verificationPoints || {
+    email: 10, profile: 10, education: 15, skills: 15, gov: 50
+  };
+
+  const handleGovUpload = async (e) => {
+    e.preventDefault();
+    if (!file) return;
+    setUploadingGov(true);
+    setMessage('');
+    try {
+      await uploadGovernmentId(currentUser.uid, file, docType);
+      setMessage('✅ Document verified automatically!');
+      setFile(null);
+      if (fetchUserProfile) await fetchUserProfile(currentUser.uid);
+      setTimeout(() => { setActiveUpload(null); setMessage(''); }, 2000);
+    } catch (err) {
+      setMessage(`❌ Error: ${err.message}`);
+    }
+    setUploadingGov(false);
+  };
+
+  const [cooldown, setCooldown] = useState(0);
+
+  const handleSendEmailOtp = async () => {
+    try {
+      setVerifyingEmail(true);
+      setMessage('');
+      
+      const email = currentUser?.email || userProfile?.email;
+      if (!email) throw new Error("No email found on your profile.");
+
+      await sendEmailOTP(currentUser.uid, email);
+      
+      setOtpSent(true);
+      setMessage(`✅ 6-Digit code sent securely to ${email.substring(0, 2)}****@${email.split('@')[1]}`);
+      
+      // Start 60-second cooldown
+      setCooldown(60);
+      const timer = setInterval(() => {
+        setCooldown(c => {
+          if (c <= 1) { clearInterval(timer); return 0; }
+          return c - 1;
+        });
+      }, 1000);
+
+    } catch (err) {
+      setMessage(`❌ Error details: ${err.message}`);
+    }
+    setVerifyingEmail(false);
+  };
+
+  const handleVerifyEmailOtp = async (e) => {
+    e.preventDefault();
+    setVerifyingEmail(true);
+    setMessage('');
+    try {
+      await verifyEmailOTP(currentUser.uid, otp);
+      setMessage('✅ Email Verified Successfully!');
+      if (fetchUserProfile) await fetchUserProfile(currentUser.uid);
+      setTimeout(() => { setActiveUpload(null); setOtpSent(false); setMessage(''); }, 2000);
+    } catch (err) {
+      setMessage(`❌ Error: ${err.message}`);
+    }
+    setVerifyingEmail(false);
+  };
+
+  const handleActionClick = (key) => {
+    setMessage('');
+    if (key === 'email') {
+      setActiveUpload(activeUpload === 'email' ? null : 'email');
+    } else if (key === 'gov') {
+      setActiveUpload(activeUpload === 'gov' ? null : 'gov');
+    } else {
+      // Profile, Education, Skills are read-only (based on user profile)
+      setMessage('ℹ️ Please complete this section in your Profile page to auto-verify.');
+      setTimeout(() => setMessage(''), 3000);
+    }
+  };
+
+  const ChecklistItem = ({ id, title, pointValue, isVerified, onClick }) => (
+    <motion.div 
+      className="card mb-3" 
+      whileHover={{ scale: 1.01 }}
+      onClick={() => onClick(id)}
+      style={{ 
+        padding: '20px 24px', 
+        cursor: 'pointer',
+        borderLeft: isVerified ? '4px solid var(--color-success)' : '4px solid transparent',
+        background: 'var(--color-surface)'
+      }}
+    >
+      <div className="flex justify-between items-center">
+        <div>
+          <div className="font-semibold text-lg">{title}</div>
+          <div className="text-secondary text-sm">+{pointValue} Trust Points</div>
+        </div>
+        <div className="flex items-center gap-4">
+          <span className={`badge ${isVerified ? 'badge-verified' : 'badge-new'}`}>
+            {isVerified ? 'Verified ✅' : 'Pending ⏳'}
+          </span>
+          <span className="text-secondary" style={{ fontSize: '20px' }}>→</span>
+        </div>
+      </div>
+    </motion.div>
+  );
 
   return (
-    <div className="page-full" style={{ maxWidth: 800, margin: '0 auto' }}>
-      <motion.div
-        className="flex justify-between items-center mb-6"
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        <div>
-          <h1 style={{ fontSize: '24px', fontWeight: 700 }}>🛡️ Trust Verification Center</h1>
-          <p className="text-sm text-secondary mt-2">Complete steps to unlock the HIGH_TRUST badge and boost your visibility.</p>
-        </div>
+    <div className="page-full" style={{ maxWidth: 1000, margin: '0 auto' }}>
+      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
+        <h1 className="text-2xl font-bold mb-2">🛡️ Get Verified</h1>
+        <p className="text-secondary">Verify your identity and background to reach HIGH TRUST status.</p>
+        {message && (
+          <div className="mt-4 p-3 rounded" style={{ background: message.includes('❌') ? 'var(--color-danger-light)' : 'var(--color-success-light)' }}>
+            {message}
+          </div>
+        )}
       </motion.div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr) 280px', gap: 24 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '32px' }}>
         
-        {/* Verification Checklist */}
-        <div style={{ flex: 1 }}>
-          <motion.div className="card card-body mb-4" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-            <h3 style={{ fontSize: '18px', fontWeight: 600, marginBottom: 16 }}>Verification Checklist</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {verifications.map((item, i) => (
-                <div key={i} className="flex justify-between items-center p-3 rounded" style={{ background: item.verified ? 'var(--color-surface)' : 'var(--color-bg)', border: '1px solid var(--color-border-light)' }}>
-                  <div className="flex items-center gap-3">
-                    <div style={{ 
-                      width: 24, height: 24, borderRadius: '50%', 
-                      background: item.verified ? 'var(--color-success-light)' : 'var(--color-border)',
-                      color: item.verified ? 'var(--color-success)' : 'var(--color-text-muted)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: '12px'
-                    }}>
-                      {item.verified ? '✓' : ''}
-                    </div>
-                    <div>
-                      <div className="font-semibold text-sm">{item.title}</div>
-                      <div className="text-xs text-muted mt-1">{item.desc}</div>
-                    </div>
-                  </div>
-                  <div className="flex flex-col items-end gap-1">
-                    <span className="badge font-mono" style={{ background: 'var(--color-surface)' }}>+{item.points} pts</span>
-                    {!item.verified && (
-                      <a href={item.title.includes('Email') ? '#' : '/profile'} className="text-xs font-semibold" style={{ color: 'var(--color-primary)' }}>Complete →</a>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-        </div>
+        {/* Left Panel: Checklist */}
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          <h3 className="section-title mb-4">Verification Checklist</h3>
 
-        {/* Status Widget */}
-        <div>
-          <motion.div className="card card-body mb-4" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-            <div className="text-center mb-4">
-              <h4 style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-secondary)' }}>Current Status</h4>
-              <div className="mt-2 text-2xl font-bold flex justify-center"><TrustBadge badge={userProfile.trustBadge || 'NEW'} size="lg" /></div>
-            </div>
-            
-            <TrustScoreWidget score={userProfile.trustScore || 0} badge={userProfile.trustBadge || 'NEW'} />
-            
-            <div className="mt-4 text-center">
-              <p className="text-xs text-muted p-3 bg-surface rounded">
-                Trust scores are calculated securely on our backend. Completing the checklist will drastically improve your ranking in feeds and search results.
-              </p>
-            </div>
-          </motion.div>
-        </div>
+          <ChecklistItem 
+            id="email" title="Email Verification" 
+            pointValue={points.email} isVerified={breakdown.email} 
+            onClick={handleActionClick} 
+          />
+
+          <AnimatePresence>
+            {activeUpload === 'email' && !breakdown.email && (
+              <motion.div 
+                initial={{ opacity: 0, height: 0 }} 
+                animate={{ opacity: 1, height: 'auto' }} 
+                exit={{ opacity: 0, height: 0 }}
+                className="card card-body mb-4"
+              >
+                {!otpSent ? (
+                  <div className="text-center p-4">
+                    <p className="mb-4">Verify your email address to strengthen your account.</p>
+                    <button 
+                      className="btn btn-primary" 
+                      onClick={handleSendEmailOtp}
+                      disabled={cooldown > 0 || verifyingEmail}
+                    >
+                      {verifyingEmail ? "Generating..." : cooldown > 0 ? `Resend down in ${cooldown}s` : "Send OTP Code"}
+                    </button>
+                  </div>
+                ) : (
+                  <form onSubmit={handleVerifyEmailOtp} className="p-2">
+                    <label className="form-label">Enter 6-Digit OTP</label>
+                    <input 
+                      type="text" 
+                      className="form-input mb-4" 
+                      maxLength={6}
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value)}
+                      placeholder="123456"
+                    />
+                    <div className="flex gap-2">
+                      <button className="btn btn-secondary flex-1" onClick={() => setOtpSent(false)} type="button">Cancel</button>
+                      <button className="btn btn-primary flex-1" disabled={verifyingEmail || otp.length !== 6}>
+                        {verifyingEmail ? 'Verifying...' : 'Verify Email'}
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <ChecklistItem 
+            id="profile" title="Profile Details" 
+            pointValue={points.profile} isVerified={breakdown.profile} 
+            onClick={handleActionClick} 
+          />
+          <ChecklistItem 
+            id="education" title="Education Details" 
+            pointValue={points.education} isVerified={breakdown.education} 
+            onClick={handleActionClick} 
+          />
+          <ChecklistItem 
+            id="skills" title="Skills & Endorsements" 
+            pointValue={points.skills} isVerified={breakdown.skills} 
+            onClick={handleActionClick} 
+          />
+
+          <div className="my-6"></div>
+
+          <ChecklistItem 
+            id="gov" title="Government ID" 
+            pointValue={points.gov} isVerified={breakdown.gov} 
+            onClick={handleActionClick} 
+          />
+
+          <AnimatePresence>
+            {activeUpload === 'gov' && !breakdown.gov && (
+              <motion.div 
+                initial={{ opacity: 0, height: 0 }} 
+                animate={{ opacity: 1, height: 'auto' }} 
+                exit={{ opacity: 0, height: 0 }}
+                className="card card-body mb-4"
+                style={{ overflow: 'hidden' }}
+              >
+                <form onSubmit={handleGovUpload}>
+                  <div className="flex gap-2 mb-4">
+                    {['aadhaar', 'pan', 'dl'].map(type => (
+                      <button
+                        type="button"
+                        key={type}
+                        onClick={() => setDocType(type)}
+                        className={`flex-1 ${docType === type ? 'btn-primary' : 'btn-secondary'} rounded py-2 text-sm font-semibold uppercase`}
+                        style={{ border: '1px solid var(--color-border)' }}
+                      >
+                        {type}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="form-group">
+                    <input type="file" className="form-input" accept=".pdf,image/*" onChange={(e) => setFile(e.target.files[0])} />
+                    <small className="text-secondary">Upload a clear photo or PDF (Max 5MB)</small>
+                  </div>
+
+                  <div className="flex gap-2 mt-4">
+                    <button className="btn btn-secondary flex-1" onClick={() => setActiveUpload(null)} type="button">Cancel</button>
+                    <button className="btn btn-primary flex-1" disabled={uploadingGov || !file}>
+                      {uploadingGov ? "Uploading..." : "Upload & Verify"}
+                    </button>
+                  </div>
+                </form>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+        </motion.div>
+
+        {/* Right Panel: Trust Score */}
+        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
+          <div style={{ position: 'sticky', top: '24px' }}>
+            <TrustScoreWidget 
+              score={userProfile?.trustScore || 0} 
+              badge={userProfile?.trustBadge || 'NEW'} 
+            />
+          </div>
+        </motion.div>
+
       </div>
     </div>
   );
