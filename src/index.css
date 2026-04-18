@@ -175,6 +175,15 @@ ul, ol {
   background: var(--color-text-muted);
 }
 
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* ---- Layout Classes ---- */
 .app-layout {
   display: flex;
@@ -1289,15 +1298,57 @@ ul, ol {
 .auth-page {
   min-height: 100vh;
   display: flex;
-  align-items: center;
+  align-items: stretch;
+  background: var(--color-bg);
+  overflow: hidden;
+}
+
+.auth-split-container {
+  display: flex;
+  width: 100%;
+}
+
+.auth-side-panel {
+  flex: 1.2;
+  background: var(--color-primary);
+  color: white;
+  display: flex;
+  flex-direction: column;
   justify-content: center;
-  background: var(--color-surface);
+  padding: var(--space-12) var(--space-10);
+  position: relative;
+  overflow: hidden;
+}
+
+.auth-side-panel::before {
+  content: '';
+  position: absolute;
+  width: 150%;
+  height: 150%;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+  top: -25%;
+  left: -25%;
+  pointer-events: none;
+}
+
+.auth-form-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   padding: var(--space-4);
+  background: var(--color-bg);
+  overflow: hidden;
 }
 
 .auth-container {
   width: 100%;
   max-width: 440px;
+  max-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .auth-logo {
@@ -1312,34 +1363,52 @@ ul, ol {
 }
 
 .auth-card {
-  background: var(--color-bg);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-lg);
-  padding: var(--space-8);
+  background: transparent;
+  padding: var(--space-4) 0;
 }
 
 .auth-title {
-  font-size: var(--font-size-2xl);
+  font-size: var(--font-size-xl);
   font-weight: var(--font-weight-bold);
   text-align: center;
   margin-bottom: var(--space-1);
 }
 
 .auth-subtitle {
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-xs);
   color: var(--color-text-secondary);
   text-align: center;
-  margin-bottom: var(--space-6);
+  margin-bottom: var(--space-4);
 }
 
-.auth-divider {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  margin: var(--space-5) 0;
+.auth-compact-fields .form-group {
+  margin-bottom: var(--space-2);
+}
+
+.auth-compact-fields .form-label {
+  font-size: 11px;
+  margin-bottom: 2px;
   color: var(--color-text-muted);
-  font-size: var(--font-size-sm);
+}
+
+.auth-compact-fields .form-input,
+.auth-compact-fields .form-select {
+  height: 34px;
+  font-size: 13px;
+  padding: 0 var(--space-2);
+}
+
+.form-group {
+  margin-bottom: var(--space-3);
+}
+
+.role-selector {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  padding: 4px;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
 }
 
 .auth-divider::before,
@@ -1380,36 +1449,45 @@ ul, ol {
   box-shadow: var(--shadow-sm);
 }
 
-/* ---- Role Selector ---- */
+/* ---- Role Selector (Flattened) ---- */
 .role-selector {
   display: flex;
-  gap: var(--space-3);
-  margin-bottom: var(--space-5);
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+  padding: 4px;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
 }
 
 .role-option {
   flex: 1;
-  padding: var(--space-4);
-  border: 2px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
   text-align: center;
   cursor: pointer;
   transition: all var(--transition-fast);
+  border: 1px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
 }
 
 .role-option:hover {
-  border-color: var(--color-primary-light);
-  background: var(--color-surface);
+  background: var(--color-bg);
 }
 
 .role-option.selected {
-  border-color: var(--color-primary);
-  background: var(--color-primary-light);
+  background: var(--color-bg);
+  border-color: var(--color-border);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-primary);
 }
 
 .role-option-icon {
-  font-size: 28px;
-  margin-bottom: var(--space-2);
+  font-size: 18px;
+  display: flex;
+  align-items: center;
 }
 
 .role-option-title {
@@ -1418,9 +1496,7 @@ ul, ol {
 }
 
 .role-option-desc {
-  font-size: var(--font-size-xs);
-  color: var(--color-text-muted);
-  margin-top: var(--space-1);
+  display: none;
 }
 
 /* ---- Suggestion Panel ---- */

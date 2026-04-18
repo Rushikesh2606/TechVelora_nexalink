@@ -96,11 +96,11 @@ export default function PostCard({ post, onUpdate }) {
           <div className="post-timestamp">{timeAgo(post.createdAt)}</div>
         </div>
         {post.postType && (
-          <span className="badge badge-verified" style={{ fontSize: '11px' }}>
-            {post.postType === 'achievement' ? '🏆' : 
-             post.postType === 'project' ? '🚀' :
-             post.postType === 'certification' ? '📜' :
-             post.postType === 'milestone' ? '🎉' : '📢'} 
+          <span className="badge badge-verified" style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: 4 }}>
+            {post.postType === 'achievement' ? <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 15-5 5V5l5 5 5-5v15z"/></svg> : 
+             post.postType === 'project' ? <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 14 4-4-4-4"/><path d="M3 3.5c2.5 0 4.5 2 4.5 4.5s-2 4.5-4.5 4.5"/><path d="M15 13.5c2.5 0 4.5 2 4.5 4.5s-2 4.5-4.5 4.5"/><path d="M18.4 12H12"/></svg> :
+             post.postType === 'certification' ? <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 20H5a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2z"/><path d="M8 6h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg> :
+             post.postType === 'milestone' ? <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> : <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8a3 3 0 0 0-3-3H5a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V8Z"/></svg>} 
             {post.postType}
           </span>
         )}
@@ -118,7 +118,12 @@ export default function PostCard({ post, onUpdate }) {
 
       {/* Stats */}
       <div className="post-stats">
-        <span>{likesCount > 0 ? `👍 ${likesCount} likes` : ''}</span>
+        <span>{likesCount > 0 ? (
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+            {likesCount} likes
+          </span>
+        ) : ''}</span>
         <span>
           {(post.commentsCount || 0) > 0 ? `${post.commentsCount} comments` : ''}
           {(post.repostsCount || 0) > 0 ? ` · ${post.repostsCount} reposts` : ''}
@@ -131,18 +136,23 @@ export default function PostCard({ post, onUpdate }) {
           className={`post-action-btn ${liked ? 'liked' : ''}`} 
           onClick={handleLike}
           id={`like-btn-${post.postId}`}
+          style={{ display: 'flex', alignItems: 'center', gap: 6 }}
         >
-          {liked ? '👍' : '👍'} Like
+          <svg width="16" height="16" viewBox="0 0 24 24" fill={liked ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>
+          Like
         </button>
         <button 
           className="post-action-btn" 
           onClick={handleToggleComments}
           id={`comment-btn-${post.postId}`}
+          style={{ display: 'flex', alignItems: 'center', gap: 6 }}
         >
-          💬 Comment
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Comment
         </button>
-        <button className="post-action-btn" id={`repost-btn-${post.postId}`}>
-          🔄 Repost
+        <button className="post-action-btn" id={`repost-btn-${post.postId}`} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg>
+          Repost
         </button>
       </div>
 

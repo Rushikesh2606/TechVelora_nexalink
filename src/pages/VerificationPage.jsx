@@ -45,12 +45,22 @@ export default function VerificationPage() {
     setMessage('');
     try {
       await uploadGovernmentId(currentUser.uid, file, docType);
-      setMessage('✅ Document verified automatically!');
+      setMessage(
+        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Document verified automatically!
+        </span>
+      );
       setFile(null);
       if (fetchUserProfile) await fetchUserProfile(currentUser.uid);
       setTimeout(() => { setActiveUpload(null); setMessage(''); }, 2000);
     } catch (err) {
-      setMessage(`❌ Error: ${err.message}`);
+      setMessage(
+        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          Error: {err.message}
+        </span>
+      );
     }
     setUploadingGov(false);
   };
@@ -68,7 +78,12 @@ export default function VerificationPage() {
       await sendEmailOTP(currentUser.uid, email);
       
       setOtpSent(true);
-      setMessage(`✅ 6-Digit code sent securely to ${email.substring(0, 2)}****@${email.split('@')[1]}`);
+      setMessage(
+        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          6-Digit code sent securely to {email.substring(0, 2)}****@{email.split('@')[1]}
+        </span>
+      );
       
       // Start 60-second cooldown
       setCooldown(60);
@@ -80,7 +95,12 @@ export default function VerificationPage() {
       }, 1000);
 
     } catch (err) {
-      setMessage(`❌ Error details: ${err.message}`);
+      setMessage(
+        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          Error details: {err.message}
+        </span>
+      );
     }
     setVerifyingEmail(false);
   };
@@ -91,11 +111,21 @@ export default function VerificationPage() {
     setMessage('');
     try {
       await verifyEmailOTP(currentUser.uid, otp);
-      setMessage('✅ Email Verified Successfully!');
+      setMessage(
+        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          Email Verified Successfully!
+        </span>
+      );
       if (fetchUserProfile) await fetchUserProfile(currentUser.uid);
       setTimeout(() => { setActiveUpload(null); setOtpSent(false); setMessage(''); }, 2000);
     } catch (err) {
-      setMessage(`❌ Error: ${err.message}`);
+      setMessage(
+        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+          Error: {err.message}
+        </span>
+      );
     }
     setVerifyingEmail(false);
   };
@@ -108,7 +138,12 @@ export default function VerificationPage() {
       setActiveUpload(activeUpload === 'gov' ? null : 'gov');
     } else {
       // Profile, Education, Skills are read-only (based on user profile)
-      setMessage('ℹ️ Please complete this section in your Profile page to auto-verify.');
+      setMessage(
+        <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          Please complete this section in your Profile page to auto-verify.
+        </span>
+      );
       setTimeout(() => setMessage(''), 3000);
     }
   };
@@ -131,8 +166,12 @@ export default function VerificationPage() {
           <div className="text-secondary text-sm">+{pointValue} Trust Points</div>
         </div>
         <div className="flex items-center gap-4">
-          <span className={`badge ${isVerified ? 'badge-verified' : 'badge-new'}`}>
-            {isVerified ? 'Verified ✅' : 'Pending ⏳'}
+          <span className={`badge ${isVerified ? 'badge-verified' : 'badge-new'}`} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            {isVerified ? (
+              <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Verified</>
+            ) : (
+              <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Pending</>
+            )}
           </span>
           <span className="text-secondary" style={{ fontSize: '20px' }}>→</span>
         </div>
@@ -143,10 +182,13 @@ export default function VerificationPage() {
   return (
     <div className="page-full" style={{ maxWidth: 1000, margin: '0 auto' }}>
       <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
-        <h1 className="text-2xl font-bold mb-2">🛡️ Get Verified</h1>
+        <h1 className="text-2xl font-bold mb-2" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--color-primary)' }}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> 
+          Get Verified
+        </h1>
         <p className="text-secondary">Verify your identity and background to reach HIGH TRUST status.</p>
         {message && (
-          <div className="mt-4 p-3 rounded" style={{ background: message.includes('❌') ? 'var(--color-danger-light)' : 'var(--color-success-light)' }}>
+          <div className="mt-4 p-3 rounded" style={{ background: (typeof message === 'string' && message.includes('Error')) || (React.isValidElement(message) && JSON.stringify(message).includes('circle')) ? 'var(--color-danger-light)' : 'var(--color-success-light)' }}>
             {message}
           </div>
         )}

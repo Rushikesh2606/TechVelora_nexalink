@@ -23,6 +23,11 @@ export default defineConfig({
   plugins: [jsxInJsPlugin(), react(), tailwindcss()],
   server: {
     proxy: {
+      '/api/verify-company': {
+        target: 'http://localhost:5000',
+        changeOrigin: true,
+        secure: false,
+      },
       '/api': {
         target: 'http://localhost:8000',
         changeOrigin: true,

@@ -15,11 +15,11 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
   const [error, setError] = useState('');
 
   const postTypes = [
-    { value: 'update', label: '📢 Update', desc: 'Share a general update' },
-    { value: 'achievement', label: '🏆 Achievement', desc: 'Celebrate a win' },
-    { value: 'project', label: '🚀 Project', desc: 'Showcase your work' },
-    { value: 'certification', label: '📜 Certification', desc: 'New credential' },
-    { value: 'milestone', label: '🎉 Milestone', desc: 'Mark a milestone' }
+    { value: 'update', label: <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8a3 3 0 0 0-3-3H5a3 3 0 0 0-3 3v8a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V8Z"/><path d="M10 12h.01"/><path d="M14 12h.01"/><path d="M6 12h.01"/></svg> Update</span>, desc: 'Share a general update' },
+    { value: 'achievement', label: <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 15-5 5V5l5 5 5-5v15z"/></svg> Achievement</span>, desc: 'Celebrate a win' },
+    { value: 'project', label: <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 14 4-4-4-4"/><path d="M3 3.5c2.5 0 4.5 2 4.5 4.5s-2 4.5-4.5 4.5"/><path d="M15 13.5c2.5 0 4.5 2 4.5 4.5s-2 4.5-4.5 4.5"/><path d="M18.4 12H12"/></svg> Project</span>, desc: 'Showcase your work' },
+    { value: 'certification', label: <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 12h-5"/><path d="M15 8h-5"/><path d="M19 20H5a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2z"/><path d="M8 6h.01"/><path d="M8 10h.01"/><path d="M8 14h.01"/></svg> Certification</span>, desc: 'New credential' },
+    { value: 'milestone', label: <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Milestone</span>, desc: 'Mark a milestone' }
   ];
 
   function handleMediaSelect(e) {
@@ -101,8 +101,14 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
             onClick={handleSubmit} 
             disabled={loading || !content.trim()}
             id="submit-post-btn"
+            style={{ display: 'flex', alignItems: 'center', gap: 8 }}
           >
-            {loading ? '⏳ Posting...' : '📤 Post'}
+            {loading ? (
+              <svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+            ) : (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+            )}
+            {loading ? 'Posting...' : 'Post'}
           </button>
         </>
       }
@@ -179,14 +185,17 @@ export default function CreatePostModal({ isOpen, onClose, onPostCreated }) {
               alignItems: 'center',
               justifyContent: 'center'
             }}
-          >✕</button>
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+          </button>
         </div>
       )}
 
       {/* Media Upload Button */}
       <div className="flex items-center gap-2 mt-3">
-        <label className="btn btn-ghost btn-sm" style={{ cursor: 'pointer' }}>
-          📷 Photo
+        <label className="btn btn-ghost btn-sm" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          Photo
           <input type="file" accept="image/*" onChange={handleMediaSelect} style={{ display: 'none' }} />
         </label>
       </div>

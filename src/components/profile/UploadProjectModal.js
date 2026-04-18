@@ -95,7 +95,12 @@ export default function UploadProjectModal({ isOpen, onClose, onProjectUploaded 
             onClick={handleSubmit} 
             disabled={loading || !title || !githubUrl || !zipFile}
           >
-            {loading ? '🧠 AI is Evaluating...' : 'Upload & Evaluate'}
+            {loading ? (
+              <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <svg className="animate-spin" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> 
+                AI is Evaluating...
+              </span>
+            ) : 'Upload & Evaluate'}
           </button>
         </>
       }
@@ -152,7 +157,9 @@ export default function UploadProjectModal({ isOpen, onClose, onProjectUploaded 
             </div>
           ) : (
             <>
-              <div style={{ marginBottom: '12px', fontSize: '24px' }}>📁</div>
+              <div style={{ marginBottom: '12px', color: 'var(--color-primary)', opacity: 0.8 }}>
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>
+              </div>
               <div style={{ fontSize: '14px', fontWeight: '500', marginBottom: '4px' }}>Click to Browse</div>
               <div style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>Max 15MB</div>
               <input 

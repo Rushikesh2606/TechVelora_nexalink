@@ -93,7 +93,9 @@ function AppLayout() {
           <Route path="*" element={
             <div className="page-full">
               <div className="empty-state">
-                <div className="empty-state-icon">🔍</div>
+                <div className="empty-state-icon">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5 }}><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                </div>
                 <h3 className="empty-state-title">Page Not Found</h3>
                 <p className="empty-state-text">The page you're looking for doesn't exist.</p>
                 <a href="/" className="btn btn-primary">Go Home</a>

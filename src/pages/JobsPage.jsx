@@ -154,7 +154,10 @@ export default function JobsPage() {
         animate={{ opacity: 1, y: 0 }}
       >
         <div>
-          <h1 style={{ fontSize: '24px', fontWeight: 700 }}>💼 Job Marketplace</h1>
+          <h1 style={{ fontSize: '24px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 10 }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            Job Marketplace
+          </h1>
           <p className="text-sm text-secondary mt-2">Experienced roles only — find your next career move</p>
         </div>
         {isCompany && (
@@ -172,14 +175,19 @@ export default function JobsPage() {
         transition={{ delay: 0.1 }}
       >
         <div className="flex gap-3 items-center">
-          <input
-            className="form-input"
-            placeholder="🔍 Search jobs by title or company..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={{ flex: 1 }}
-            id="job-search-input"
-          />
+          <div style={{ position: 'relative', flex: 1 }}>
+            <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--color-text-muted)' }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            </span>
+            <input
+              className="form-input"
+              placeholder="Search jobs by title or company..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={{ paddingLeft: 38 }}
+              id="job-search-input"
+            />
+          </div>
           <select className="form-select" style={{ width: 160 }} value={filter} onChange={(e) => setFilter(e.target.value)}>
             <option value="all">All Types</option>
             <option value="full-time">Full-time</option>
@@ -204,7 +212,11 @@ export default function JobsPage() {
       </div>
 
       {filteredJobs.length === 0 && (
-        <EmptyState icon="💼" title="No jobs found" message="Try adjusting your search or check back later." />
+        <EmptyState 
+          icon={<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5 }}><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>} 
+          title="No jobs found" 
+          message="Try adjusting your search or check back later." 
+        />
       )}
 
       {/* Create Job Modal */}
@@ -215,8 +227,13 @@ export default function JobsPage() {
         footer={
           <>
             <button className="btn btn-secondary" onClick={() => setShowCreateJob(false)}>Cancel</button>
-            <button className="btn btn-primary" onClick={handleCreateJob} disabled={creating} id="submit-job-btn">
-              {creating ? '⏳ Posting...' : '📤 Post Job'}
+            <button className="btn btn-primary" onClick={handleCreateJob} disabled={creating} id="submit-job-btn" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              {creating ? (
+                <svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+              ) : (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+              )}
+              {creating ? 'Posting...' : 'Post Job'}
             </button>
           </>
         }
@@ -247,7 +264,10 @@ export default function JobsPage() {
           <div className="form-group">
             <label className="form-label">Min. Experience (years) *</label>
             <input type="number" className="form-input" min="1" value={jobForm.requiredExperienceYears} onChange={(e) => setJobForm(prev => ({ ...prev, requiredExperienceYears: parseInt(e.target.value) || 1 }))} />
-            <div className="text-xs text-muted mt-1">⚠️ Minimum 1 year (experienced only)</div>
+            <div className="text-xs text-muted mt-1" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--color-warning)' }}><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              Minimum 1 year (experienced only)
+            </div>
           </div>
           <div className="form-group">
             <label className="form-label">Salary Range</label>
@@ -259,8 +279,8 @@ export default function JobsPage() {
           <input className="form-input" placeholder="e.g. React" value={skillInput} onChange={(e) => setSkillInput(e.target.value)} onKeyDown={handleSkillAdd} />
           <div className="flex flex-wrap gap-2 mt-2">
             {jobForm.requiredSkills.map((s, i) => (
-              <span key={i} className="badge badge-skill" style={{ cursor: 'pointer' }} onClick={() => setJobForm(prev => ({ ...prev, requiredSkills: prev.requiredSkills.filter((_, idx) => idx !== i) }))}>
-                {s} ✕
+              <span key={i} className="badge badge-skill" style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }} onClick={() => setJobForm(prev => ({ ...prev, requiredSkills: prev.requiredSkills.filter((_, idx) => idx !== i) }))}>
+                {s} <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
               </span>
             ))}
           </div>

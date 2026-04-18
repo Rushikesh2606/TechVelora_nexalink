@@ -162,6 +162,16 @@ export default function ProfilePage() {
         transition={{ duration: 0.4 }}
       >
         <div style={{ height: 200, background: 'linear-gradient(135deg, #2563EB, #7C3AED)', position: 'relative' }}>
+          {isOwnProfile && (
+            <button 
+              className="btn btn-sm btn-glass" 
+              style={{ position: 'absolute', top: 16, right: 16, zIndex: 10, display: 'flex', alignItems: 'center', gap: 6, backdropFilter: 'blur(8px)', background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid rgba(255,255,255,0.2)' }}
+              onClick={() => alert('Banner upload coming soon!')}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              Change Banner
+            </button>
+          )}
           <div style={{ position: 'absolute', bottom: -50, left: 32, borderRadius: '50%', border: '4px solid var(--color-surface)', background: 'var(--color-surface)' }}>
             <Avatar 
               src={profile.avatarUrl || profile.logoUrl}
@@ -190,8 +200,8 @@ export default function ProfilePage() {
               </p>
               
               <div className="text-sm text-secondary mt-2 flex items-center gap-4">
-                {profile.location && (<span>📍 {profile.location}</span>)}
-                {profile.role === 'company' && profile.website && (<span>🌐 <a href={profile.website} target="_blank" rel="noreferrer" className="text-primary">{profile.website.replace('https://', '')}</a></span>)}
+                {profile.location && (<span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg> {profile.location}</span>)}
+                {profile.role === 'company' && profile.website && (<span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> <a href={profile.website} target="_blank" rel="noreferrer" className="text-primary">{profile.website.replace('https://', '')}</a></span>)}
                 <span style={{ color: 'var(--color-primary)', fontWeight: 600 }}>• {profile.connectionsCount || 0} connections</span>
               </div>
             </div>
@@ -200,18 +210,28 @@ export default function ProfilePage() {
               {isOwnProfile ? (
                 <>
                   {profile.trustScore < 100 && (
-                    <button className="btn btn-outline-primary" onClick={() => navigate('/verify')} style={{ gap: 6 }}>
-                      <span style={{ fontSize: 16 }}>🛡️</span> Get Verified
+                    <button className="btn btn-outline-primary" onClick={() => navigate('/verify')} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                      Get Verified
                     </button>
                   )}
-                  <button className="btn btn-secondary" onClick={openEdit}>✏️ Edit</button>
+                  <button className="btn btn-secondary" onClick={openEdit} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>
+                    Edit Profile
+                  </button>
                 </>
               ) : (
                 <>
                   {connectionStatus === 'connected' ? (
-                    <button className="btn btn-secondary" disabled>✅ Connected</button>
+                    <button className="btn btn-secondary" disabled style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      Connected
+                    </button>
                   ) : connectionStatus === 'pending' ? (
-                    <button className="btn btn-secondary" disabled>⏳ Pending</button>
+                    <button className="btn btn-secondary" disabled style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                      Pending
+                    </button>
                   ) : connectionStatus === 'received' ? (
                     <button className="btn btn-primary" onClick={handleAccept}>Accept Request</button>
                   ) : (
@@ -255,7 +275,7 @@ export default function ProfilePage() {
                   {profile.education.map((edu, i) => (
                     <div key={i} className="flex gap-3 pt-3" style={{ borderTop: i > 0 ? '1px solid var(--color-border-light)' : 'none' }}>
                       <div style={{ padding: '8px', background: 'var(--color-bg)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        🎓
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
                       </div>
                       <div>
                         <div className="font-semibold text-sm">{edu.school}</div>
@@ -312,8 +332,9 @@ export default function ProfilePage() {
                     <div key={proj.id} style={{ padding: 16, border: '1px solid var(--color-border)', borderRadius: 'var(--radius-md)', background: 'var(--color-surface)' }}>
                       <div className="flex justify-between items-start" style={{ marginBottom: 8 }}>
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
-                          <a href={proj.githubUrl} target="_blank" rel="noreferrer" style={{ fontSize: '16px', fontWeight: 600, color: 'var(--color-primary)' }}>
-                            {proj.title} 🔗
+                          <a href={proj.githubUrl} target="_blank" rel="noreferrer" style={{ fontSize: '16px', fontWeight: 600, color: 'var(--color-primary)', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                            {proj.title}
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
                           </a>
                           <span className={`badge ${proj.rating !== 'Error' && proj.rating !== 'Pending' ? 'badge-high-trust' : 'badge-new'}`} style={{ width: 'fit-content', marginTop: '4px' }}>
                             {proj.rating}
@@ -328,10 +349,13 @@ export default function ProfilePage() {
                               color: 'var(--color-danger)', 
                               position: 'relative', 
                               zIndex: 10,
-                              background: 'rgba(239, 68, 68, 0.1)'
+                              background: 'rgba(239, 68, 68, 0.1)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
                             }}
                           >
-                            🗑️
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                           </button>
                         )}
                       </div>
@@ -389,8 +413,13 @@ export default function ProfilePage() {
         footer={
           <>
             <button className="btn btn-secondary" onClick={() => setEditing(false)}>Cancel</button>
-            <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
-              {saving ? '⏳ Saving...' : '💾 Save Changes'}
+            <button className="btn btn-primary" onClick={handleSave} disabled={saving} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              {saving ? (
+                <svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+              ) : (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+              )}
+              {saving ? 'Saving...' : 'Save Changes'}
             </button>
           </>
         }
@@ -432,7 +461,9 @@ export default function ProfilePage() {
             {(editData.education || []).map((edu, i) => (
               <div key={i} className="flex justify-between items-center text-sm p-2 mb-2 bg-surface rounded border border-light">
                 <div><strong>{edu.school}</strong> — {edu.degree} <span className="text-muted">({edu.year})</span></div>
-                <button className="text-danger p-1" onClick={() => removeEdu(i)}>✕</button>
+                <button className="text-danger p-1" onClick={() => removeEdu(i)}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
               </div>
             ))}
 
@@ -444,7 +475,9 @@ export default function ProfilePage() {
                 {(editData.skills || []).map((skill, i) => (
                   <span key={i} className="badge badge-skill flex items-center gap-1">
                     {skill} 
-                    <span style={{ cursor: 'pointer', fontSize: 10, padding: 2 }} onClick={() => removeSkill(i)}>✕</span>
+                    <span style={{ cursor: 'pointer', display: 'flex', alignItems: 'center' }} onClick={() => removeSkill(i)}>
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                    </span>
                   </span>
                 ))}
               </div>
