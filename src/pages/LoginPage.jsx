@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
@@ -6,66 +6,95 @@ import { useAuth } from '../contexts/AuthContext';
 export default function LoginPage() {
   const { loginWithEmail, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    function handleMessage(event) {
+      if (event.data?.type === 'FACE_LOGIN_VERIFIED') {
+        alert('Verification completed');
+        navigate('/');
+      }
+    }
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [navigate]);
+
   async function handleEmailLogin(e) {
     e.preventDefault();
+
     if (!email || !password) {
       setError('Please fill in all fields');
       return;
     }
+
     setLoading(true);
     setError('');
+
     try {
-      await loginWithEmail(email, password);
-      navigate('/');
+      const normalizedEmail = email.trim().toLowerCase();
+      await loginWithEmail(normalizedEmail, password);
+
+      const encodedEmail = encodeURIComponent(normalizedEmail);
+      window.open(`http://localhost:3000/?mode=verify&userId=${encodedEmail}`, '_blank');
     } catch (err) {
       setError(err.message || 'Failed to sign in');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   async function handleGoogleLogin() {
     setLoading(true);
     setError('');
+
     try {
       await loginWithGoogle();
       navigate('/');
     } catch (err) {
       setError(err.message || 'Failed to sign in with Google');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   return (
     <div className="auth-page">
-      <motion.div 
+      <motion.div
         className="auth-container"
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }}
       >
         <div className="auth-logo">
-          <div className="navbar-brand-icon" style={{ width: 40, height: 40, fontSize: 16 }}>TL</div>
-          <span style={{
-            background: 'linear-gradient(135deg, #2563EB, #7C3AED)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent'
-          }}>Nexalink</span>
+          <div className="navbar-brand-icon" style={{ width: 40, height: 40, fontSize: 16 }}>
+            TL
+          </div>
+          <span
+            style={{
+              background: 'linear-gradient(135deg, #2563EB, #7C3AED)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent'
+            }}
+          >
+            Nexalink
+          </span>
         </div>
 
         <div className="auth-card">
           <h1 className="auth-title">Welcome back</h1>
           <p className="auth-subtitle">Sign in to your professional network</p>
 
-          <button 
-            className="google-btn" 
+          <button
+            className="google-btn"
             onClick={handleGoogleLogin}
             disabled={loading}
             id="google-login-btn"
+            type="button"
           >
             <svg width="18" height="18" viewBox="0 0 18 18">
               <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
@@ -90,6 +119,7 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
+
             <div className="form-group">
               <label className="form-label" htmlFor="login-password">Password</label>
               <input
@@ -104,8 +134,8 @@ export default function LoginPage() {
 
             {error && <div className="form-error mb-3">{error}</div>}
 
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="btn btn-primary btn-lg btn-full"
               disabled={loading}
               id="email-login-btn"
